@@ -5,5 +5,5 @@ __pycache__/
 predictions/
 uploads/
 models/saved_models/lstm_model.keras
-models/saved_models/random_forest.pkl
+#models/saved_models/random_forest.pkl
 models/saved_models/deployment_rf.pkl
