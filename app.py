@@ -26,6 +26,8 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
 
+    print("Predict function started")
+
     file = request.files["file"]
 
     filepath = os.path.join(
@@ -34,10 +36,10 @@ def predict():
     )
 
     file.save(filepath)
+    print("File saved")
 
-     # Read CSV
     df = pd.read_csv(filepath)
-
+    print("CSV loaded:", df.shape)
     # Convert date column
     df["date"] = pd.to_datetime(df["date"])
 
