@@ -22,13 +22,15 @@ model = joblib.load("models/saved_models/random_forest.pkl")
 def home():
     return render_template("index.html")
 
-
+print("13. Starting prediction")
 @app.route("/predict", methods=["POST"])
+
 def predict():
 
-    print("Predict function started")
+    print("1. Predict function started")
 
     file = request.files["file"]
+    print("2. File received")
 
     filepath = os.path.join(
         app.config["UPLOAD_FOLDER"],
@@ -36,12 +38,14 @@ def predict():
     )
 
     file.save(filepath)
-    print("File saved")
+    print("3. File saved")
 
     df = pd.read_csv(filepath)
-    print("CSV loaded:", df.shape)
-    # Convert date column
+    print("4. CSV loaded", df.shape)
+
     df["date"] = pd.to_datetime(df["date"])
+    print("5. Date converted")
+    print("14. Prediction complete")
 
     # Create time features
     df["Hour"] = df["date"].dt.hour
@@ -50,6 +54,7 @@ def predict():
     df["Day"] = df["date"].dt.day
     df["Week"] = df["date"].dt.isocalendar().week.astype(int)
     df["Year"] = df["date"].dt.year
+    print("6. Time features created")
 
     # Weekend
     df["Weekend"] = (df["date"].dt.dayofweek >= 5).astype(int)
@@ -60,6 +65,7 @@ def predict():
     df["Lag_6"] = df["Appliances"].shift(6)
     df["Lag_12"] = df["Appliances"].shift(12)
     df["Lag_24"] = df["Appliances"].shift(24)
+    print("7. Lag features created")
 
     # Rolling features
     df["Rolling_Mean_6"] = df["Appliances"].rolling(window=6).mean()
@@ -67,12 +73,15 @@ def predict():
 
     df["Rolling_STD_6"] = df["Appliances"].rolling(window=6).std()
     df["Rolling_STD_12"] = df["Appliances"].rolling(window=12).std()
+    print("8. Rolling features created")
 
     # Remove rows with NaN created by lag/rolling
     df = df.dropna()
+    print("9. Dropna complete", df.shape)
 
     # Remove target column
     df = df.drop(columns=["Appliances"])
+    print("10. Columns dropped")
 
     # Remove date column
     df = df.drop(columns=["date"])
@@ -84,6 +93,7 @@ def predict():
         drop_first=True,
         dtype=int
     )
+    print("11. One-hot encoding complete", df.shape)
     expected_columns = [
     'lights', 'T1', 'RH_1', 'T2', 'RH_2', 'T3', 'RH_3', 'T4',
     'RH_4', 'T5', 'RH_5', 'T6', 'RH_6', 'T7', 'RH_7', 'T8',
