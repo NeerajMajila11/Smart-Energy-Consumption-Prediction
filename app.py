@@ -43,57 +43,15 @@ def predict():
     df = pd.read_csv(filepath)
     print("4. CSV loaded", df.shape)
 
-    df["date"] = pd.to_datetime(df["date"])
-    print("5. Date converted")
-    print("14. Prediction complete")
+# Remove target column if present
+    if "Appliances" in df.columns:
+        df = df.drop(columns=["Appliances"])
 
-    # Create time features
-    df["Hour"] = df["date"].dt.hour
-    df["DayOfWeek"] = df["date"].dt.day_name()
-    df["Month"] = df["date"].dt.month_name()
-    df["Day"] = df["date"].dt.day
-    df["Week"] = df["date"].dt.isocalendar().week.astype(int)
-    df["Year"] = df["date"].dt.year
-    print("6. Time features created")
+# Remove date column if present
+    if "date" in df.columns:
+        df = df.drop(columns=["date"])
 
-    # Weekend
-    df["Weekend"] = (df["date"].dt.dayofweek >= 5).astype(int)
-
-    # Lag features (using Appliances column)
-    df["Lag_1"] = df["Appliances"].shift(1)
-    df["Lag_2"] = df["Appliances"].shift(2)
-    df["Lag_6"] = df["Appliances"].shift(6)
-    df["Lag_12"] = df["Appliances"].shift(12)
-    df["Lag_24"] = df["Appliances"].shift(24)
-    print("7. Lag features created")
-
-    # Rolling features
-    df["Rolling_Mean_6"] = df["Appliances"].rolling(window=6).mean()
-    df["Rolling_Mean_12"] = df["Appliances"].rolling(window=12).mean()
-
-    df["Rolling_STD_6"] = df["Appliances"].rolling(window=6).std()
-    df["Rolling_STD_12"] = df["Appliances"].rolling(window=12).std()
-    print("8. Rolling features created")
-
-    # Remove rows with NaN created by lag/rolling
-    df = df.dropna()
-    print("9. Dropna complete", df.shape)
-
-    # Remove target column
-    df = df.drop(columns=["Appliances"])
-    print("10. Columns dropped")
-
-    # Remove date column
-    df = df.drop(columns=["date"])
-
-    # One-hot encoding
-    df = pd.get_dummies(
-        df,
-        columns=["DayOfWeek", "Month"],
-        drop_first=True,
-        dtype=int
-    )
-    print("11. One-hot encoding complete", df.shape)
+    print("5. Dataset ready for prediction", df.shape)
     expected_columns = [
     'lights', 'T1', 'RH_1', 'T2', 'RH_2', 'T3', 'RH_3', 'T4',
     'RH_4', 'T5', 'RH_5', 'T6', 'RH_6', 'T7', 'RH_7', 'T8',
